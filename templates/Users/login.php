@@ -14,9 +14,9 @@
 
 <?= $this->Form->end() ?>
 
-<br>
-
-<?= $this->Html->link(
-    'Create an account',
-    ['action' => 'register']
-) ?>
+<p>
+    <?= $this->Html->link(
+        'Create an account',
+        ['action' => 'register']
+    ) ?>
+</p>
