@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace App\Controller;
+use Cake\Event\EventInterface;
 
 /**
  * Users Controller
@@ -11,6 +12,24 @@ namespace App\Controller;
  */
 class UsersController extends AppController
 {
+    public function initialize(): void
+    {
+        parent::initialize();
+
+        $this->loadComponent(
+            'Authentication.Authentication'
+        );
+    }
+
+    public function beforeFilter(EventInterface $event)
+    {
+        parent::beforeFilter($event);
+
+        $this->Authentication->allowUnauthenticated([
+            'login',
+            'register',
+        ]);
+    }
     public function register()
     {
         $user = $this->Users->newEmptyEntity();
@@ -43,34 +62,22 @@ class UsersController extends AppController
 
     public function login()
     {
-        if ($this->request->is('post')) {
+        $result = $this->request
+            ->getAttribute('authentication')
+            ->getResult();
 
-            $email = $this->request->getData('email');
-            $password = $this->request->getData('password');
+        if ($result->isValid()) {
 
-            $user = $this->Users->find()
-                ->where([
-                    'email' => $email
-                ])
-                ->first();
-
-            if (
-                $user &&
-                (new \Cake\Auth\DefaultPasswordHasher())
-                    ->check($password, $user->password)
-            ) {
-
-                $this->request->getSession()->write(
-                    'Auth.User',
-                    $user
-                );
-
-                return $this->redirect([
+            $redirect = $this->request
+                ->getQuery('redirect', [
                     'controller' => 'Products',
-                    'action' => 'index'
+                    'action' => 'index',
                 ]);
-            }
 
+            return $this->redirect($redirect);
+        }
+
+        if ($this->request->is('post')) {
             $this->Flash->error(
                 'Invalid email or password.'
             );
@@ -79,10 +86,11 @@ class UsersController extends AppController
 
     public function logout()
     {
-        $this->request->getSession()->delete('Auth.User');
+        $this->Authentication->logout();
 
         return $this->redirect([
-            'action' => 'login'
+            'controller' => 'Users',
+            'action' => 'login',
         ]);
     }
 }

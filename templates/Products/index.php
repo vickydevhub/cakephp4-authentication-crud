@@ -6,6 +6,24 @@
 ?>
 <div class="products index content">
     <?= $this->Html->link(__('New Product'), ['action' => 'add'], ['class' => 'button float-right']) ?>
+    <?php if ($identity): ?>
+
+<p>
+    Welcome,
+    <?= h($identity->get('name')) ?>
+
+    |
+    
+    <?= $this->Form->postLink(
+        'Logout',
+        [
+            'controller' => 'Users',
+            'action' => 'logout'
+        ]
+    ) ?>
+</p>
+
+<?php endif; ?>
     <h3><?= __('Products') ?></h3>
     <div class="table-responsive">
         <table>

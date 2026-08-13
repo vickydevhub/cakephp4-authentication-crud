@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 use Cake\Event\EventInterface;
+use Authentication\Controller\Component\AuthenticationComponent;
 
 /**
  * Products Controller
@@ -12,16 +13,15 @@ use Cake\Event\EventInterface;
  */
 class ProductsController extends AppController
 {
-    public function beforeFilter(EventInterface $event)
+    public function initialize(): void
     {
-        parent::beforeFilter($event);
+        parent::initialize();
 
-        $result = $this->requireLogin();
-
-        if ($result !== null) {
-            return $result;
-        }
+        $this->loadComponent(
+            'Authentication.Authentication'
+        );
     }
+
     /**
      * Index method
      *
@@ -29,9 +29,10 @@ class ProductsController extends AppController
      */
     public function index()
     {
+        $identity = $this->request->getAttribute('identity');
         $products = $this->paginate($this->Products);
 
-        $this->set(compact('products'));
+        $this->set(compact('products', 'identity'));
     }
 
     /**
